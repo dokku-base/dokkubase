@@ -1,7 +1,7 @@
 import { generateId } from "./token";
-import type { Session, User } from "./types";
+import type { Session } from "./types";
 import { db } from "../db";
-import { sessions, users } from "./schema";
+import { sessions } from "./schema";
 import { eq } from "drizzle-orm";
 
 export class Auth {
