@@ -2,6 +2,8 @@
 ---
 
 <form id="login-form" class="login-form">
+  <div id="error-message" class="error-message" style="display: none; color: red; margin-bottom: 1rem;"></div>
+  
   <div class="field">
     <label for="email">Email</label>
     <input type="email" id="email" name="email" required />
@@ -12,7 +14,10 @@
     <input type="password" id="password" name="password" required />
   </div>
 
-  <button type="submit">Log in</button>
+  <button type="submit">
+    <span class="button-text">Log in</span>
+    <span class="loading-spinner" style="display: none"></span>
+  </button>
   
   <!-- TODO: Add OAuth buttons -->
   <!-- <button type="button" class="github">Login with GitHub</button> -->
@@ -21,10 +26,23 @@
 
 <script>
 const form = document.querySelector("#login-form") as HTMLFormElement;
+const button = form.querySelector("button") as HTMLButtonElement;
+const buttonText = button.querySelector(".button-text") as HTMLSpanElement;
+const spinner = button.querySelector(".loading-spinner") as HTMLSpanElement;
+const errorDiv = document.querySelector("#error-message") as HTMLDivElement;
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const formData = new FormData(form);
+  
+  // Clear previous errors
+  errorDiv.style.display = "none";
+  errorDiv.textContent = "";
+  
+  // Show loading state
+  button.disabled = true;
+  buttonText.textContent = "Logging in...";
+  spinner.style.display = "inline-block";
 
   try {
     const res = await fetch("/api/auth/login", {
@@ -38,13 +56,24 @@ form.addEventListener("submit", async (e) => {
       }
     });
 
-    if (!res.ok) throw new Error("Login failed");
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Login failed");
+    }
     
     // Redirect to dashboard on success
     window.location.href = "/";
   } catch (err) {
     console.error(err);
-    // TODO: Show error message to user
+    // Show error message
+    errorDiv.textContent = err instanceof Error ? err.message : "Login failed";
+    errorDiv.style.display = "block";
+  } finally {
+    // Reset loading state
+    button.disabled = false;
+    buttonText.textContent = "Log in";
+    spinner.style.display = "none";
   }
 });
 </script>
@@ -82,9 +111,32 @@ button {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button:hover {
   opacity: 0.9;
+}
+
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  margin-left: 8px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 </style> 

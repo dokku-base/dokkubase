@@ -19,6 +19,8 @@ try {
     <main>
         <h1>Create Admin Account</h1>
         <form id="register-form" class="register-form">
+            <div id="error-message" class="error-message" style="display: none; color: red; margin-bottom: 1rem;"></div>
+            
             <div class="field">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required />
@@ -26,21 +28,36 @@ try {
             
             <div class="field">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required 
-                    minlength="8" />
+                <input type="password" id="password" name="password" required />
             </div>
 
-            <button type="submit">Create Account</button>
+            <button type="submit">
+                <span class="button-text">Create Account</span>
+                <span class="loading-spinner" style="display: none"></span>
+            </button>
         </form>
     </main>
 </Layout>
 
 <script>
     const form = document.querySelector("#register-form") as HTMLFormElement;
+    const button = form.querySelector("button") as HTMLButtonElement;
+    const buttonText = button.querySelector(".button-text") as HTMLSpanElement;
+    const spinner = button.querySelector(".loading-spinner") as HTMLSpanElement;
+    const errorDiv = document.querySelector("#error-message") as HTMLDivElement;
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const formData = new FormData(form);
+        
+        // Clear previous errors
+        errorDiv.style.display = "none";
+        errorDiv.textContent = "";
+        
+        // Show loading state
+        button.disabled = true;
+        buttonText.textContent = "Creating account...";
+        spinner.style.display = "inline-block";
 
         try {
             const res = await fetch("/api/auth/register", {
@@ -60,12 +77,18 @@ try {
                 throw new Error(data.error || "Registration failed");
             }
             
-            // Force reload to ensure middleware picks up the new session
+            // Redirect to dashboard on success
             window.location.href = "/";
         } catch (err) {
             console.error(err);
-            // TODO: Show error to user
-            alert(err.message || "Registration failed");
+            // Show error message
+            errorDiv.textContent = err instanceof Error ? err.message : "Registration failed";
+            errorDiv.style.display = "block";
+        } finally {
+            // Reset loading state
+            button.disabled = false;
+            buttonText.textContent = "Create Account";
+            spinner.style.display = "none";
         }
     });
 </script>
