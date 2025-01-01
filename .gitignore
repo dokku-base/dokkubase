@@ -26,3 +26,5 @@ pnpm-debug.log*
 # documentation and reference files
 /docs/
 /refs/
+*.db
+*.db-journal
