@@ -1,0 +1,30 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoginForm from '../components/LoginForm.astro';
+
+// Redirect if already logged in
+const session = Astro.locals.session;
+if (session) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout title="Login - DokkuBase">
+  <main>
+    <h1>Login to DokkuBase</h1>
+    <LoginForm />
+  </main>
+</Layout>
+
+<style>
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+</style> 

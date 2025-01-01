@@ -28,3 +28,6 @@ pnpm-debug.log*
 /refs/
 *.db
 *.db-journal
+
+# data directory
+data/

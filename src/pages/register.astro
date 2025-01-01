@@ -1,0 +1,117 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { db } from '../lib/db';
+import { users } from '../lib/auth/schema';
+
+// Check if registration is allowed (no users exist)
+try {
+    const [existingUser] = await db.select().from(users);
+    if (existingUser) {
+        return Astro.redirect("/login");
+    }
+} catch (error) {
+    console.error('Database error:', error);
+    return new Response('Database error', { status: 500 });
+}
+---
+
+<Layout title="Register - DokkuBase">
+    <main>
+        <h1>Create Admin Account</h1>
+        <form id="register-form" class="register-form">
+            <div class="field">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required />
+            </div>
+            
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required 
+                    minlength="8" />
+            </div>
+
+            <button type="submit">Create Account</button>
+        </form>
+    </main>
+</Layout>
+
+<script>
+    const form = document.querySelector("#register-form") as HTMLFormElement;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: formData.get("email"),
+                    password: formData.get("password")
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Registration failed");
+            }
+            
+            // Force reload to ensure middleware picks up the new session
+            window.location.href = "/";
+        } catch (err) {
+            console.error(err);
+            // TODO: Show error to user
+            alert(err.message || "Registration failed");
+        }
+    });
+</script>
+
+<style>
+    main {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .register-form {
+        max-width: 400px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    .field {
+        margin-bottom: 1rem;
+    }
+
+    .field label {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .field input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    button {
+        width: 100%;
+        padding: 0.75rem;
+        background: #000;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        opacity: 0.9;
+    }
+</style>

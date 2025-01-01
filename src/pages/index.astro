@@ -1,11 +1,39 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Get user data from session
+const { session } = Astro.locals;
+
+// Redirect if not logged in
+if (!session) {
+    return Astro.redirect("/login");
+}
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="DokkuBase Dashboard">
+    <header class="header">
+        <h1>DokkuBase</h1>
+        <form action="/api/auth/logout" method="POST">
+            <button type="submit">Logout</button>
+        </form>
+    </header>
+
+    <main>
+        <h2>Your Dokku Apps</h2>
+        <!-- TODO: Add Dokku apps list -->
+    </main>
 </Layout>
+
+<style>
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: #f4f4f4;
+}
+
+main {
+    padding: 2rem;
+}
+</style>
