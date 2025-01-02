@@ -1,48 +1,68 @@
-# Astro Starter Kit: Basics
+# Dokkubase 
 
-```sh
-npm create astro@latest -- --template basics
+Self-hosted admin panel for Dokku with a modern UI and real-time updates.
+
+## Features 
+
+- Modern UI built with Astro 5.0
+- Real-time updates via Server-Sent Events (SSE)
+- Full Dokku API support
+- SQLite database with WAL mode for better performance
+- Type-safe API with TypeScript
+- Mock API for development and testing
+
+## Getting Started 
+
+1. Install dependencies:
+```bash
+npm install
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+2. Setup database:
+```bash
+npm run db:setup
+```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+3. Start development server:
+```bash
+npm run dev
+```
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+## Development 
 
-## 🚀 Project Structure
+### Project Structure
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
+```
 /
-├── public/
-│   └── favicon.svg
 ├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+│   ├── lib/
+│   │   ├── mock-dokku/     # Mock Dokku API
+│   │   └── db/             # Database layer
+│   ├── pages/
+│   │   └── api/           # API endpoints
+│   └── types/             # TypeScript types
+├── scripts/               # Utility scripts
+└── docs/                 # Documentation
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### Available Scripts
 
-## 🧞 Commands
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run db:setup` | Setup database |
+| `npm run db:migrate` | Run database migrations |
+| `npm run test` | Run tests |
 
-All commands are run from the root of the project, from a terminal:
+## Contributing 
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 👀 Want to learn more?
+## License 
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+MIT License - see the [LICENSE](LICENSE) file for details
