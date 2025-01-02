@@ -7,5 +7,11 @@ export default defineConfig({
     output: 'server',
     adapter: node({
         mode: 'standalone'
-    })
+    }),
+    vite: {
+        logLevel: 'info',
+        build: {
+            sourcemap: true
+        }
+    }
 });
