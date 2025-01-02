@@ -1,0 +1,132 @@
+---
+// Only check setup token - middleware handles the rest
+const setupToken = Astro.cookies.get("setup_token")?.value;
+const adminToken = import.meta.env.ADMIN_TOKEN;
+
+console.log("[Account] Setup token:", setupToken ? "present" : "missing");
+console.log("[Account] Admin token:", adminToken ? "present" : "missing");
+
+if (!setupToken || !adminToken || setupToken !== adminToken) {
+    console.log("[Account] Invalid token, redirecting to setup");
+    return Astro.redirect("/setup/token");
+}
+
+console.log("[Account] Token valid, showing form");
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin Account - Dokkubase</title>
+    <style>
+        /* Basic styles - replace with Preline later */
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .error { 
+            color: red;
+            margin: 10px 0;
+            display: none;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Admin Account</h1>
+    <p>Set up your admin account to start using Dokkubase.</p>
+
+    <form id="setup-form">
+        <div id="error" class="error"></div>
+        
+        <div class="field">
+            <label for="email">Admin Email</label>
+            <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                required 
+                placeholder="admin@your-domain.com"
+            />
+        </div>
+        
+        <div class="field">
+            <label for="password">Password</label>
+            <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                required 
+                placeholder="Secure password"
+                minlength="8"
+            />
+        </div>
+
+        <button type="submit" id="submit">
+            Create Admin Account
+        </button>
+    </form>
+
+    <script>
+        const form = document.getElementById("setup-form") as HTMLFormElement;
+        const error = document.getElementById("error") as HTMLDivElement;
+        const submit = form.querySelector("button") as HTMLButtonElement;
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            // Reset state
+            error.style.display = "none";
+            submit.disabled = true;
+            submit.textContent = "Creating account...";
+
+            try {
+                const res = await fetch("/api/setup/create-admin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: form.email.value,
+                        password: form.password.value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Failed to create account");
+                }
+
+                // Redirect to dashboard on success
+                window.location.href = "/";
+
+            } catch (err) {
+                error.textContent = err instanceof Error ? err.message : "Setup failed";
+                error.style.display = "block";
+                submit.disabled = false;
+                submit.textContent = "Create Admin Account";
+            }
+        });
+    </script>
+</body>
+</html>

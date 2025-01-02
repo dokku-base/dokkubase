@@ -1,10 +1,23 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { db } from '../lib/db';
+import { users } from '../lib/auth/schema';
 
-// Get user data from session
+// 1. Check if any users exist
+try {
+    const [existingUser] = await db.select().from(users);
+    if (!existingUser) {
+        return Astro.redirect("/setup/token");
+    }
+} catch (error) {
+    console.error('Database error:', error);
+    return new Response('Database error', { status: 500 });
+}
+
+// 2. Get user data from session
 const { session } = Astro.locals;
 
-// Redirect if not logged in
+// 3. Redirect if not logged in
 if (!session) {
     return Astro.redirect("/login");
 }
@@ -25,15 +38,15 @@ if (!session) {
 </Layout>
 
 <style>
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background: #f4f4f4;
-}
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: #f4f4f4;
+    }
 
-main {
-    padding: 2rem;
-}
+    main {
+        padding: 2rem;
+    }
 </style>

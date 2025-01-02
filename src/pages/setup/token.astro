@@ -1,0 +1,105 @@
+---
+// Setup token page is the entry point for setup
+// It should not redirect anywhere unless setup is complete
+console.log("[Token] Showing setup form");
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokkubase Setup</title>
+    <style>
+        /* Basic styles - replace with Preline later */
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .error { 
+            color: red;
+            margin: 10px 0;
+            display: none;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Dokkubase</h1>
+    <p>Enter your admin token to continue setup:</p>
+
+    <form id="tokenForm">
+        <input 
+            type="text" 
+            id="token" 
+            name="token" 
+            placeholder="Enter admin token"
+            required
+        >
+        <div id="error" class="error"></div>
+        <button type="submit" id="submit">Continue Setup</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('tokenForm');
+        const error = document.getElementById('error');
+        const submit = document.getElementById('submit');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Disable form
+            submit.disabled = true;
+            error.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/setup/verify-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: form.token.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    error.textContent = data.error;
+                    error.style.display = 'block';
+                    submit.disabled = false;
+                    return;
+                }
+
+                // Redirect on success
+                window.location.href = data.redirect;
+
+            } catch (err) {
+                error.textContent = 'Server error. Please try again.';
+                error.style.display = 'block';
+                submit.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

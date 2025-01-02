@@ -2,29 +2,29 @@
 import Layout from '../layouts/Layout.astro';
 import LoginForm from '../components/LoginForm.astro';
 
-// Redirect if already logged in
-const session = Astro.locals.session;
-if (session) {
-  return Astro.redirect("/");
-}
+// Middleware handles all redirects:
+// - No users -> /setup/token
+// - Has session -> /
+// - Otherwise show login form
+console.log("[Login] Showing login form");
 ---
 
 <Layout title="Login - DokkuBase">
-  <main>
-    <h1>Login to DokkuBase</h1>
-    <LoginForm />
-  </main>
+    <main>
+        <h1>Login to DokkuBase</h1>
+        <LoginForm />
+    </main>
 </Layout>
 
 <style>
-main {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
+    main {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
 
-h1 {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-</style> 
+    h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+</style>
