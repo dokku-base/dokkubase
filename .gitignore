@@ -28,6 +28,9 @@ pnpm-debug.log*
 /refs/
 *.db
 *.db-journal
+*.sqlite
+*.sqlite-journal
+sqlite.db
 
 # data directory
 data/

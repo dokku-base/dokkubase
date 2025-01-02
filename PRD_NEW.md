@@ -1,4 +1,4 @@
-# 🚀 Dokkubase - Prosty ale Potężny Panel dla Dokku
+y# 🚀 Dokkubase - Prosty ale Potężny Panel dla Dokku
 
 ## Wizja
 Dokkubase to prosty, open-source panel admin który zamienia skomplikowane komendy Dokku w przyjazny interfejs webowy.

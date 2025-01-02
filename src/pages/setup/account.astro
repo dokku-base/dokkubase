@@ -32,6 +32,14 @@ console.log("[Account] Token valid, showing form");
             color: red;
             margin: 10px 0;
             display: none;
+            padding: 10px;
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 4px;
+        }
+        .error ul {
+            margin: 5px 0;
+            padding-left: 20px;
         }
         input {
             width: 100%;
@@ -51,6 +59,11 @@ console.log("[Account] Token valid, showing form");
             opacity: 0.5;
             cursor: not-allowed;
         }
+        .requirements {
+            font-size: 0.9em;
+            color: #666;
+            margin: 5px 0 15px;
+        }
     </style>
 </head>
 <body>
@@ -69,6 +82,9 @@ console.log("[Account] Token valid, showing form");
                 required 
                 placeholder="admin@your-domain.com"
             />
+            <div class="requirements">
+                Must be a valid email address
+            </div>
         </div>
         
         <div class="field">
@@ -79,8 +95,17 @@ console.log("[Account] Token valid, showing form");
                 name="password" 
                 required 
                 placeholder="Secure password"
-                minlength="8"
+                minlength="12"
             />
+            <div class="requirements">
+                Must be at least 12 characters and contain:
+                <ul>
+                    <li>One uppercase letter</li>
+                    <li>One lowercase letter</li>
+                    <li>One number</li>
+                    <li>One special character</li>
+                </ul>
+            </div>
         </div>
 
         <button type="submit" id="submit">
@@ -114,6 +139,11 @@ console.log("[Account] Token valid, showing form");
                 const data = await res.json();
 
                 if (!res.ok) {
+                    if (data.details) {
+                        // Format validation errors
+                        const messages = data.details.map((d: any) => d.message);
+                        throw new Error(messages.join('\n• '));
+                    }
                     throw new Error(data.error || "Failed to create account");
                 }
 
@@ -121,7 +151,10 @@ console.log("[Account] Token valid, showing form");
                 window.location.href = "/";
 
             } catch (err) {
-                error.textContent = err instanceof Error ? err.message : "Setup failed";
+                const message = err instanceof Error ? err.message : "Setup failed";
+                error.innerHTML = message.includes('\n') 
+                    ? `<strong>Validation errors:</strong><ul><li>${message.split('\n').join('</li><li>')}</li></ul>`
+                    : message;
                 error.style.display = "block";
                 submit.disabled = false;
                 submit.textContent = "Create Admin Account";
