@@ -114,6 +114,31 @@ console.log("[Account] Token valid, showing form");
     </form>
 
     <script>
+        // Safe error formatting without external deps
+        function safeFormatErrors(errors: string[] | undefined | null): string {
+            if (!Array.isArray(errors) || errors.length === 0) {
+                return "An error occurred";
+            }
+
+            const escaped = errors.map(e => {
+                if (typeof e !== 'string') return '';
+                return e
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }).filter(Boolean);
+
+            if (escaped.length === 0) {
+                return "An error occurred";
+            }
+
+            return `<strong>Validation errors:</strong><ul>${
+                escaped.map(e => `<li>${e}</li>`).join('')
+            }</ul>`;
+        }
+
         const form = document.getElementById("setup-form") as HTMLFormElement;
         const error = document.getElementById("error") as HTMLDivElement;
         const submit = form.querySelector("button") as HTMLButtonElement;
@@ -140,21 +165,18 @@ console.log("[Account] Token valid, showing form");
 
                 if (!res.ok) {
                     if (data.details) {
-                        // Format validation errors
                         const messages = data.details.map((d: any) => d.message);
-                        throw new Error(messages.join('\n• '));
+                        error.innerHTML = safeFormatErrors(messages);
+                    } else {
+                        error.textContent = data.error || "Failed to create account";
                     }
-                    throw new Error(data.error || "Failed to create account");
+                    throw new Error("Validation failed");
                 }
 
                 // Redirect to dashboard on success
                 window.location.href = "/";
 
             } catch (err) {
-                const message = err instanceof Error ? err.message : "Setup failed";
-                error.innerHTML = message.includes('\n') 
-                    ? `<strong>Validation errors:</strong><ul><li>${message.split('\n').join('</li><li>')}</li></ul>`
-                    : message;
                 error.style.display = "block";
                 submit.disabled = false;
                 submit.textContent = "Create Admin Account";
