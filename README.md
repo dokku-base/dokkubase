@@ -1,15 +1,17 @@
 # Dokkubase 
 
-Self-hosted admin panel for Dokku with a modern UI and real-time updates.
+> **Note:** This is an **unofficial** GUI admin panel for Dokku. While it has received a green light from the Dokku maintainers, it is not officially supported by the Dokku team. For official Dokku support, please use their [official channels](https://github.com/dokku/dokku).
+
+Modern and user-friendly admin panel for [Dokku](https://dokku.com/) with real-time updates and a clean interface. Built with Astro 5.0 and TypeScript.
 
 ## Features 
 
-- Modern UI built with Astro 5.0
-- Real-time updates via Server-Sent Events (SSE)
-- Full Dokku API support
-- SQLite database with WAL mode for better performance
-- Type-safe API with TypeScript
-- Mock API for development and testing
+- 🚀 Modern UI built with Astro 5.0
+- ⚡️ Real-time updates via Server-Sent Events (SSE)
+- 🔌 Full Dokku API support via SSH
+- 💾 SQLite database with WAL mode for better performance
+- 🔒 Type-safe API with TypeScript
+- 🧪 Mock API for development and testing
 
 ## Getting Started 
 
@@ -66,3 +68,8 @@ npm run dev
 ## License 
 
 MIT License - see the [LICENSE](LICENSE) file for details
+
+## Support
+
+For Dokkubase-specific issues, please use [GitHub Issues](https://github.com/screenfluent/dokkubase/issues).
+For Dokku-related questions, please refer to the [official Dokku documentation](https://dokku.com/docs/).
