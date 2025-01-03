@@ -4,67 +4,22 @@ import { users } from "../../../lib/auth/schema";
 import { hashPassword } from "../../../lib/auth/password";
 import { generateId } from "../../../lib/auth/token";
 import { auth } from "../../../lib/auth";
-import { z } from "zod";
-
-// Validate admin account data
-const adminSchema = z.object({
-    email: z.string()
-        .email("Invalid email address")
-        .min(5, "Email must be at least 5 characters")
-        .max(100, "Email must be at most 100 characters")
-        .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Invalid email format"),
-    password: z.string()
-        .min(12, "Password must be at least 12 characters")
-        .max(100, "Password must be at most 100 characters")
-        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-        .regex(/[0-9]/, "Password must contain at least one number")
-        .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character")
-});
-
-// Rate limiting
-const RATE_LIMIT = 5; // requests
-const RATE_WINDOW = 60 * 1000; // 1 minute
-const attempts = new Map<string, { count: number, firstAttempt: number }>();
+import { adminSchema } from "../../../actions/setup/schemas";
+import { errorResponse, successResponse, rateLimiter } from "../../../actions/setup/security";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
     try {
         // 1. Rate limiting
         const ip = request.headers.get("x-forwarded-for") || "unknown";
-        const now = Date.now();
-        const attempt = attempts.get(ip) || { count: 0, firstAttempt: now };
+        const { allowed, remaining, reset } = rateLimiter.check(ip);
 
-        // Reset if window expired
-        if (now - attempt.firstAttempt > RATE_WINDOW) {
-            attempt.count = 0;
-            attempt.firstAttempt = now;
-        }
-
-        // Check rate limit
-        if (attempt.count >= RATE_LIMIT) {
+        if (!allowed) {
             console.log("[Create] Rate limit exceeded for IP:", ip);
-            return new Response(JSON.stringify({ 
-                error: "Too many attempts. Please try again later." 
-            }), { 
-                status: 429,
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Content-Security-Policy': 'default-src \'self\'',
-                    'Cross-Origin-Opener-Policy': 'same-origin',
-                    'Cross-Origin-Resource-Policy': 'same-origin',
-                    'Referrer-Policy': 'no-referrer',
-                    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-                    'X-Content-Type-Options': 'nosniff',
-                    'X-Frame-Options': 'DENY',
-                    'X-XSS-Protection': '1; mode=block',
-                    'Retry-After': String(RATE_WINDOW / 1000)
-                }
+            return errorResponse("Too many attempts. Please try again later.", 429, {
+                'Retry-After': String(reset),
+                'X-RATELIMIT-REMAINING': String(remaining)
             });
         }
-
-        // Increment attempt counter
-        attempt.count++;
-        attempts.set(ip, attempt);
 
         // 2. Verify setup session
         const setupToken = cookies.get("setup_token")?.value;
@@ -75,22 +30,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
         if (!setupToken || !adminToken || setupToken !== adminToken) {
             console.log("[Create] Invalid token");
-            return new Response(JSON.stringify({ 
-                error: "Unauthorized - complete setup first" 
-            }), { 
-                status: 401,
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Content-Security-Policy': 'default-src \'self\'',
-                    'Cross-Origin-Opener-Policy': 'same-origin',
-                    'Cross-Origin-Resource-Policy': 'same-origin',
-                    'Referrer-Policy': 'no-referrer',
-                    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-                    'X-Content-Type-Options': 'nosniff',
-                    'X-Frame-Options': 'DENY',
-                    'X-XSS-Protection': '1; mode=block'
-                }
-            });
+            return errorResponse("Unauthorized - complete setup first", 401);
         }
 
         // 3. Check if any users exist
@@ -100,22 +40,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
         if (existingUser) {
             console.log("[Create] Admin already exists");
-            return new Response(JSON.stringify({ 
-                error: "Admin account already exists" 
-            }), { 
-                status: 403,
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Content-Security-Policy': 'default-src \'self\'',
-                    'Cross-Origin-Opener-Policy': 'same-origin',
-                    'Cross-Origin-Resource-Policy': 'same-origin',
-                    'Referrer-Policy': 'no-referrer',
-                    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-                    'X-Content-Type-Options': 'nosniff',
-                    'X-Frame-Options': 'DENY',
-                    'X-XSS-Protection': '1; mode=block'
-                }
-            });
+            return errorResponse("Admin account already exists", 403);
         }
 
         // 4. Parse and validate request
@@ -125,23 +50,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
         if (!result.success) {
             console.log("[Create] Validation failed:", result.error);
-            return new Response(JSON.stringify({ 
-                error: "Invalid request",
-                details: result.error.issues
-            }), { 
-                status: 400,
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Content-Security-Policy': 'default-src \'self\'',
-                    'Cross-Origin-Opener-Policy': 'same-origin',
-                    'Cross-Origin-Resource-Policy': 'same-origin',
-                    'Referrer-Policy': 'no-referrer',
-                    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-                    'X-Content-Type-Options': 'nosniff',
-                    'X-Frame-Options': 'DENY',
-                    'X-XSS-Protection': '1; mode=block'
-                }
-            });
+            return errorResponse("Invalid request", 400, result.error.issues);
         }
 
         // 5. Create admin user
@@ -172,41 +81,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         cookies.delete("setup_token", { path: "/" });
         console.log("[Create] Setup complete");
 
-        return new Response(JSON.stringify({ 
-            success: true,
-            redirect: "/"
-        }), {
-            status: 200,
-            headers: { 
-                'Content-Type': 'application/json',
-                'Content-Security-Policy': 'default-src \'self\'',
-                'Cross-Origin-Opener-Policy': 'same-origin',
-                'Cross-Origin-Resource-Policy': 'same-origin',
-                'Referrer-Policy': 'no-referrer',
-                'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-                'X-Content-Type-Options': 'nosniff',
-                'X-Frame-Options': 'DENY',
-                'X-XSS-Protection': '1; mode=block'
-            }
-        });
+        return successResponse({ redirect: "/" });
 
     } catch (error) {
         console.error('[Create] Error:', error);
-        return new Response(JSON.stringify({ 
-            error: "Failed to create admin account" 
-        }), {
-            status: 500,
-            headers: { 
-                'Content-Type': 'application/json',
-                'Content-Security-Policy': 'default-src \'self\'',
-                'Cross-Origin-Opener-Policy': 'same-origin',
-                'Cross-Origin-Resource-Policy': 'same-origin',
-                'Referrer-Policy': 'no-referrer',
-                'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-                'X-Content-Type-Options': 'nosniff',
-                'X-Frame-Options': 'DENY',
-                'X-XSS-Protection': '1; mode=block'
-            }
-        });
+        return errorResponse("Failed to create admin account", 500);
     }
 };

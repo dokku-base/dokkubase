@@ -24,8 +24,8 @@ pnpm-debug.log*
 .idea/
 
 # documentation and reference files
-/docs/
-/refs/
+docs/
+refs/
 *.db
 *.db-journal
 *.sqlite

@@ -5,8 +5,8 @@ import { resolve } from 'path';
 const dbPath = resolve('./data/sqlite.db');
 
 export default {
-  schema: './src/lib/auth/schema.ts',
-  out: './drizzle',
+  schema: './src/db/schema/*.ts',
+  out: './src/db/migrations',
   dialect: 'sqlite',
   verbose: true,
   dbCredentials: {

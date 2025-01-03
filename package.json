@@ -14,15 +14,18 @@
     "db:wal": "tsx scripts/enable-wal.ts",
     "lint": "eslint \"src/**/*.{js,ts,astro}\"",
     "lint:fix": "eslint \"src/**/*.{js,ts,astro}\" --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest"
   },
   "dependencies": {
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
+    "@tailwindcss/cli": "^4.0.0-beta.8",
     "astro": "^5.1.1",
     "better-sqlite3": "^11.7.0",
     "bullmq": "^5.1.0",
     "drizzle-orm": "^0.38.3",
+    "tailwindcss": "^4.0.0-beta.8",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -40,6 +43,7 @@
     "globals": "^15.14.0",
     "prettier": "^3.4.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }
