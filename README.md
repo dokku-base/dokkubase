@@ -1,8 +1,6 @@
 # Dokkubase 
 
-> **Note:** This is an **unofficial** GUI admin panel for Dokku. While it has received a green light from the Dokku maintainers, it is not officially supported by the Dokku team. For official Dokku support, please use their [official channels](https://github.com/dokku/dokku).
-
-Modern and user-friendly admin panel for [Dokku](https://dokku.com/) with real-time updates and a clean interface. Built with Astro 5.0 and TypeScript.
+Modern and user-friendly admin panel for [Dokku](https://dokku.com/) that makes managing your apps a breeze. Built with Astro 5.0 and TypeScript for a snappy, real-time experience.
 
 ## Features 
 
@@ -12,6 +10,12 @@ Modern and user-friendly admin panel for [Dokku](https://dokku.com/) with real-t
 - 💾 SQLite database with WAL mode for better performance
 - 🔒 Type-safe API with TypeScript
 - 🧪 Mock API for development and testing
+
+## Support & Disclaimer
+
+> **Note:** This is an unofficial GUI tool for Dokku. For the best experience:
+> - Having issues with Dokkubase UI? [Open an issue here](https://github.com/screenfluent/dokkubase/issues)
+> - Having issues with Dokku itself? Check [Dokku's documentation](https://dokku.com/docs/)
 
 ## Getting Started 
 
@@ -68,8 +72,3 @@ npm run dev
 ## License 
 
 MIT License - see the [LICENSE](LICENSE) file for details
-
-## Support
-
-For Dokkubase-specific issues, please use [GitHub Issues](https://github.com/screenfluent/dokkubase/issues).
-For Dokku-related questions, please refer to the [official Dokku documentation](https://dokku.com/docs/).
